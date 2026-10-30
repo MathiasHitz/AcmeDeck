@@ -339,6 +339,18 @@ public sealed class NewCertificateViewModel : ObservableObject
                     "binding. Delete the other renewal after this certificate has been issued."));
             }
 
+            // win-acme leaves bindings with the Central Certificate Store option untouched
+            foreach (var host in SelectedSite?.Bindings
+                         .Where(b => b.IsHttps && b.UsesCentralCertStore && hosts.Contains(b.Host, StringComparer.OrdinalIgnoreCase))
+                         .Select(b => b.Host)
+                         .Distinct(StringComparer.OrdinalIgnoreCase) ?? [])
+            {
+                CheckResults.Add(new Issue(CheckLevel.Error,
+                    $"The HTTPS binding of {host} uses the IIS Central Certificate Store. win-acme will issue the certificate " +
+                    "but leave this binding unchanged, so IIS keeps serving the old one. First, in IIS Manager, edit the " +
+                    "binding, clear 'Use Centralized Certificate Store' and keep the current certificate selected. Then continue here."));
+            }
+
             if (Validation == ValidationMethod.SelfHosting)
             {
                 CheckResults.Add(new Issue(CheckLevel.Info,

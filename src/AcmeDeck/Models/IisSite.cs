@@ -29,6 +29,14 @@ public sealed class IisBinding
     public bool IsHttps => Protocol == "https";
     public bool UsesSni => (SslFlags & 1) == 1;
 
+    /// <summary>
+    /// "Use Centralized Certificate Store": IIS takes the certificate from
+    /// &lt;CCS folder&gt;\&lt;host&gt;.pfx and ignores the certificate of the binding.
+    /// win-acme treats such bindings as already served and leaves them alone,
+    /// unless it stores into the CCS itself (--store centralssl).
+    /// </summary>
+    public bool UsesCentralCertStore => (SslFlags & 2) == 2;
+
     public string Display => string.IsNullOrEmpty(Host)
         ? $"{Protocol}://*:{Port}"
         : $"{Protocol}://{Host}:{Port}";

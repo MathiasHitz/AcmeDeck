@@ -186,6 +186,12 @@ public sealed class MainViewModel : ObservableObject
             OnPropertyChanged(nameof(HasCertificates));
             StatusText = $"{Certificates.Count} certificate{(Certificates.Count == 1 ? "" : "s")} · refreshed {DateTime.Now:HH:mm:ss}";
 
+            // Check every certificate's bindings right away, so a certificate that
+            // was issued but never reached IIS shows up in the list, not only when selected
+            foreach (var item in Certificates.ToList())
+            {
+                _ = CheckBindingsAsync(item);
+            }
             if (SelectedTab == 1)
             {
                 _ = CheckAllBindingsAsync();
@@ -301,43 +307,55 @@ public sealed class MainViewModel : ObservableObject
 
     private async Task CheckBindingsAsync(CertificateItemViewModel? item)
     {
-        if (item == null)
+        if (item == null || item.BindingCheckRunning)
         {
             return;
         }
-        item.BindingChecks.Clear();
-        var names = new HashSet<string>(item.Certificate?.DnsNames ?? item.EffectiveHosts, StringComparer.OrdinalIgnoreCase);
-        var bindings = item.Sites
-            .SelectMany(s => s.Bindings)
-            .Where(b => b.IsHttps && names.Contains(b.Host))
-            .ToList();
-        if (bindings.Count == 0)
+        item.BindingCheckRunning = true;
+        try
         {
-            item.BindingChecks.Add(new Issue(CheckLevel.Warning, "No HTTPS binding in IIS uses these host names."));
-            return;
+            item.BindingChecks.Clear();
+            var names = new HashSet<string>(item.Certificate?.DnsNames ?? item.EffectiveHosts, StringComparer.OrdinalIgnoreCase);
+            var bindings = item.Sites
+                .SelectMany(s => s.Bindings)
+                .Where(b => b.IsHttps && names.Contains(b.Host))
+                .ToList();
+            if (bindings.Count == 0)
+            {
+                item.BindingChecks.Add(new Issue(CheckLevel.Warning, "No HTTPS binding in IIS uses these host names."));
+                return;
+            }
+            var expected = item.Renewal.LastThumbprint;
+            item.BindingChecks.Add(new Issue(CheckLevel.Info, $"Checking {bindings.Count} binding{(bindings.Count == 1 ? "" : "s")}…"));
+            var results = await Task.WhenAll(bindings.Select(b =>
+                TlsProbe.ProbeAsync(b.IpAddress, b.Port, b.Host, TimeSpan.FromSeconds(5))));
+            item.BindingChecks.Clear();
+            var mismatch = false;
+            foreach (var (binding, result) in bindings.Zip(results))
+            {
+                var ccs = binding.UsesCentralCertStore ? " The binding uses the Central Certificate Store, see the note above." : "";
+                if (result.Certificate == null)
+                {
+                    item.BindingChecks.Add(new Issue(CheckLevel.Error, $"{binding.Display}: no answer ({result.Error})."));
+                }
+                else if (expected != null && string.Equals(result.Certificate.Thumbprint, expected, StringComparison.OrdinalIgnoreCase))
+                {
+                    item.BindingChecks.Add(new Issue(CheckLevel.Ok,
+                        $"{binding.Display} serves the current certificate (valid until {result.Certificate.NotAfter:dd.MM.yyyy})."));
+                }
+                else
+                {
+                    mismatch = expected != null;
+                    item.BindingChecks.Add(new Issue(CheckLevel.Error,
+                        $"{binding.Display} serves a different certificate: {result.Certificate.Issuer}, " +
+                        $"valid until {result.Certificate.NotAfter:dd.MM.yyyy}, thumbprint {result.Certificate.Thumbprint}.{ccs}"));
+                }
+            }
+            item.BindingMismatch = mismatch;
         }
-        var expected = item.Renewal.LastThumbprint;
-        item.BindingChecks.Add(new Issue(CheckLevel.Info, $"Checking {bindings.Count} binding{(bindings.Count == 1 ? "" : "s")}…"));
-        var results = await Task.WhenAll(bindings.Select(b =>
-            TlsProbe.ProbeAsync(b.IpAddress, b.Port, b.Host, TimeSpan.FromSeconds(5))));
-        item.BindingChecks.Clear();
-        foreach (var (binding, result) in bindings.Zip(results))
+        finally
         {
-            if (result.Certificate == null)
-            {
-                item.BindingChecks.Add(new Issue(CheckLevel.Error, $"{binding.Display}: no answer ({result.Error})."));
-            }
-            else if (expected != null && string.Equals(result.Certificate.Thumbprint, expected, StringComparison.OrdinalIgnoreCase))
-            {
-                item.BindingChecks.Add(new Issue(CheckLevel.Ok,
-                    $"{binding.Display} serves the current certificate (valid until {result.Certificate.NotAfter:dd.MM.yyyy})."));
-            }
-            else
-            {
-                item.BindingChecks.Add(new Issue(CheckLevel.Error,
-                    $"{binding.Display} serves a different certificate: {result.Certificate.Issuer}, " +
-                    $"valid until {result.Certificate.NotAfter:dd.MM.yyyy}, thumbprint {result.Certificate.Thumbprint}."));
-            }
+            item.BindingCheckRunning = false;
         }
     }
 
@@ -375,7 +393,9 @@ public sealed class MainViewModel : ObservableObject
     private async Task CheckAllBindingsAsync()
     {
         var certificates = Certificates.ToList();
-        await Task.WhenAll(Bindings.ToList().Select(b => b.CheckAsync(certificates)));
+        // Refresh both views: the binding list and the per-certificate status
+        await Task.WhenAll(Bindings.ToList().Select(b => b.CheckAsync(certificates))
+            .Concat(certificates.Select(CheckBindingsAsync)));
     }
 
     private async Task NewCertificateAsync(CertificateItemViewModel? edit, BindingItemViewModel? takeOver)

@@ -282,6 +282,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
@@ -289,16 +290,36 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Style="{StaticResource Muted}" VerticalAlignment="Center"
-                                   Text="All HTTPS bindings with the certificate IIS actually serves. Certificates from other tools or purchased ones show as 'Not managed' and can be taken over by win-acme." />
+                                   Text="All HTTPS bindings with the certificate IIS actually serves. Certificates from other tools or purchased ones show as 'Not managed' and can be taken over by win-acme. 'Not applied' means a renewal exists, but IIS still serves another certificate. Select a row for details." />
                         <Button Grid.Column="1" Content="Check again" Command="{Binding CheckAllBindingsCommand}" Margin="16,0,0,0" />
                     </Grid>
-                    <DataGrid Grid.Row="1" ItemsSource="{Binding Bindings}" Style="{StaticResource ListGrid}">
+                    <!-- Explanation for the selected binding -->
+                    <Border Grid.Row="2" Margin="0,10,0,0" CornerRadius="6" Padding="12,8"
+                            DataContext="{Binding SelectedItem, ElementName=BindingsGrid}"
+                            Background="{Binding Level, Converter={StaticResource LevelToBackground}}"
+                            Visibility="{Binding Hint, Converter={StaticResource HasValue}, FallbackValue=Collapsed}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="16" Height="16" CornerRadius="8" VerticalAlignment="Top" Margin="0,1,0,0"
+                                    Background="{Binding Level, Converter={StaticResource LevelToBrush}}">
+                                <TextBlock Text="{Binding Level, Converter={StaticResource LevelToSymbol}}" Foreground="White"
+                                           FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Grid.Column="1" TextWrapping="Wrap">
+                                <Run Text="{Binding Host, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=": " /><Run Text="{Binding Hint, Mode=OneWay}" />
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                    <DataGrid x:Name="BindingsGrid" Grid.Row="1" ItemsSource="{Binding Bindings}" Style="{StaticResource ListGrid}">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Status" Width="130" CellTemplate="{StaticResource StatusCell}"
                                                     SortMemberPath="Level" />
                             <DataGridTextColumn Header="Site" Binding="{Binding SiteName}" Width="*" />
                             <DataGridTextColumn Header="Host name" Binding="{Binding Host}" Width="2*" />
-                            <DataGridTextColumn Header="Endpoint" Binding="{Binding Endpoint}" Width="120" />
+                            <DataGridTextColumn Header="Endpoint" Binding="{Binding Endpoint}" Width="190" />
                             <DataGridTextColumn Header="Issuer" Binding="{Binding IssuerText}" Width="*" />
                             <DataGridTextColumn Header="Expires" Binding="{Binding ExpiresText}" Width="150" />
                             <DataGridTextColumn Header="Managed by" Binding="{Binding ManagedByText}" Width="1.5*" />

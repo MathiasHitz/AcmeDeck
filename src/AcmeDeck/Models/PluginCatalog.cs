@@ -11,6 +11,7 @@ public static class PluginCatalog
     public const string ValidationFileSystem = "1c77b3a4-5310-4c46-92c6-00d866e84d6b";
     public const string ValidationManualDns = "e45d62b9-f9a8-441e-b95f-c5ee0dcd8040";
     public const string StoreCertificateStore = "e30adc8e-d756-4e16-a6f2-450f784b1a97";
+    public const string StoreCentralSsl = "af1f77b6-4e7b-4f96-bba5-c2eeb4d0dd42";
     public const string InstallationIis = "ea6a5be3-f8de-4d27-a6bd-750b619b2ee2";
 
     private static readonly Dictionary<string, string> Names = new(StringComparer.OrdinalIgnoreCase)
@@ -41,7 +42,7 @@ public static class PluginCatalog
         ["9aadcf71-5241-4c4f-aee1-bfe3f6be3489"] = "Elliptic curve",
         // Store
         [StoreCertificateStore] = "Windows certificate store",
-        ["af1f77b6-4e7b-4f96-bba5-c2eeb4d0dd42"] = "IIS Central Certificate Store",
+        [StoreCentralSsl] = "IIS Central Certificate Store",
         ["e57c70e4-cd60-4ba6-80f6-a41703e21031"] = "PEM files",
         ["2a2c576f-7637-4ade-b8db-e8613b0bb33e"] = "PFX file",
         ["cfdd7caa-ba34-4e9e-b9de-2a3d64c4f4ec"] = "None",

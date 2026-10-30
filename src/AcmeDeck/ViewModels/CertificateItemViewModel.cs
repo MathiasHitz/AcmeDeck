@@ -23,9 +23,12 @@ public sealed class CertificateItemViewModel : ObservableObject
             : sites.Where(s => renewal.SiteIds.Contains(s.Id)).ToList();
         RenewalDays = renewalDays;
         Issues = BuildIssues();
-        Level = Issues.Count == 0 ? CheckLevel.Ok : Issues.Max(i => i.Level);
+        _baseLevel = Issues.Count == 0 ? CheckLevel.Ok : Issues.Max(i => i.Level);
         History = new ObservableCollection<HistoryEntry>(renewal.History.AsEnumerable().Reverse());
     }
+
+    private readonly CheckLevel _baseLevel;
+    private bool _bindingMismatch;
 
     public Renewal Renewal { get; }
     public CertificateDetails? Certificate { get; }
@@ -33,17 +36,39 @@ public sealed class CertificateItemViewModel : ObservableObject
     public List<IisSite> Sites { get; }
     public int RenewalDays { get; }
     public List<Issue> Issues { get; }
-    public CheckLevel Level { get; }
     public ObservableCollection<HistoryEntry> History { get; }
 
     public ObservableCollection<Issue> BindingChecks { get; } = [];
     public ObservableCollection<Issue> DnsChecks { get; } = [];
+
+    /// <summary>Guards against two binding checks filling the list at the same time.</summary>
+    internal bool BindingCheckRunning { get; set; }
+
+    /// <summary>
+    /// Set by the binding check: IIS serves a different certificate than the one
+    /// this renewal issued last. Issuing worked, but the certificate is not in use.
+    /// </summary>
+    public bool BindingMismatch
+    {
+        get => _bindingMismatch;
+        set
+        {
+            if (SetProperty(ref _bindingMismatch, value))
+            {
+                OnPropertyChanged(nameof(Level));
+                OnPropertyChanged(nameof(StatusText));
+            }
+        }
+    }
+
+    public CheckLevel Level => _bindingMismatch ? CheckLevel.Error : _baseLevel;
 
     public string Name => Renewal.DisplayName;
 
     public string StatusText => Level switch
     {
         CheckLevel.Error when Renewal.ConsecutiveErrors > 0 => "Renewal failing",
+        CheckLevel.Error when _bindingMismatch => "Not applied",
         CheckLevel.Error when Certificate is { DaysLeft: < 0 } => "Expired",
         CheckLevel.Error => "Problem",
         CheckLevel.Warning when Certificate is { DaysLeft: < ExpiryWarningDays } => "Expires soon",
@@ -158,6 +183,23 @@ public sealed class CertificateItemViewModel : ObservableObject
             {
                 issues.Add(new Issue(CheckLevel.Error,
                     $"'{host}' is part of the next order but cannot be certified ({reason}). Let's Encrypt rejects the whole order."));
+            }
+        }
+
+        // Bindings using the Central Certificate Store are skipped by win-acme's IIS
+        // installation step unless it stores into the CCS itself
+        if (!r.StorePlugins.Contains(PluginCatalog.StoreCentralSsl, StringComparer.OrdinalIgnoreCase))
+        {
+            var names = new HashSet<string>(EffectiveHosts.Concat(Certificate?.DnsNames ?? []), StringComparer.OrdinalIgnoreCase);
+            foreach (var host in Sites.SelectMany(s => s.Bindings)
+                         .Where(b => b.IsHttps && b.UsesCentralCertStore && names.Contains(b.Host))
+                         .Select(b => b.Host)
+                         .Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                issues.Add(new Issue(CheckLevel.Error,
+                    $"The HTTPS binding of {host} uses the IIS Central Certificate Store. IIS serves {host}.pfx from the CCS " +
+                    "folder and win-acme leaves such bindings unchanged, so this certificate is not used. In IIS Manager, edit " +
+                    "the binding, clear 'Use Centralized Certificate Store' and select this certificate."));
             }
         }
 
