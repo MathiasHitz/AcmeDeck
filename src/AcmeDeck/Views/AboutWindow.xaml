@@ -42,6 +42,12 @@
                     <Hyperlink NavigateUri="https://letsencrypt.org/" RequestNavigate="OnNavigate">Let's Encrypt</Hyperlink><Run Text="." />
                 </TextBlock>
             </HeaderedContentControl>
+            <HeaderedContentControl Header="Support" Style="{StaticResource Field}">
+                <TextBlock TextWrapping="Wrap">
+                    <Run Text="If AcmeDeck saves you time or a license fee, you can" />
+                    <Hyperlink NavigateUri="https://www.paypal.com/paypalme/usterix" RequestNavigate="OnNavigate">support this project via PayPal</Hyperlink><Run Text=". Thank you!" />
+                </TextBlock>
+            </HeaderedContentControl>
             <TextBlock Style="{StaticResource Muted}" FontSize="12" Margin="0,6,0,0"
                        Text="AcmeDeck is an independent project and not affiliated with win-acme or Let's Encrypt." />
         </StackPanel>
