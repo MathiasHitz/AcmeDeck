@@ -39,10 +39,12 @@ public static class WacsCommands
         args.AddRange(["--id", id]);
         args.AddRange(["--source", "iis"]);
         args.AddRange(["--siteid", request.SiteId.ToString()]);
-        args.AddRange(["--host", string.Join(",", request.Hosts)]);
+        // Host names are case-insensitive; pass them in the canonical lower-case form
+        // instead of whatever spelling an IIS binding happens to use
+        args.AddRange(["--host", string.Join(",", request.Hosts.Select(h => h.ToLowerInvariant()))]);
         if (!string.IsNullOrWhiteSpace(request.CommonName))
         {
-            args.AddRange(["--commonname", request.CommonName]);
+            args.AddRange(["--commonname", request.CommonName.ToLowerInvariant()]);
         }
         if (!string.IsNullOrWhiteSpace(request.FriendlyName))
         {

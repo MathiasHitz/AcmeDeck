@@ -339,6 +339,16 @@ public sealed class NewCertificateViewModel : ObservableObject
                     "binding. Delete the other renewal after this certificate has been issued."));
             }
 
+            // Differently capitalized bindings of the same name: win-acme issues but does not bind
+            foreach (var host in hosts)
+            {
+                if (SelectedSite?.CaseConflict(host) is { } spellings)
+                {
+                    CheckResults.Add(new Issue(CheckLevel.Error,
+                        IisSite.CaseConflictText(host, spellings) + " Fix the spelling in IIS Manager first, then continue here."));
+                }
+            }
+
             // win-acme leaves bindings with the Central Certificate Store option untouched
             foreach (var host in SelectedSite?.Bindings
                          .Where(b => b.IsHttps && b.UsesCentralCertStore && hosts.Contains(b.Host, StringComparer.OrdinalIgnoreCase))

@@ -93,9 +93,15 @@ public sealed class BindingItemViewModel(IisSite site, IisBinding binding) : Obs
             $"the certificate issued for '{_renewal!.Name}'. win-acme does not change CCS bindings. Fix: in IIS Manager, edit this " +
             "binding, clear 'Use Centralized Certificate Store' and select the certificate of that renewal. Later renewals " +
             "then update the binding automatically.",
+        BindingState.NotApplied when Site.CaseConflict(Binding.Host) is { } spellings =>
+            $"The renewal '{_renewal!.Name}' covers {Host}, but IIS serves a different certificate. Likely cause: " +
+            IisSite.CaseConflictText(Binding.Host, spellings) + " Fix the spelling in IIS Manager and select the certificate " +
+            "of the renewal for this binding; 'Renew now' alone does not help.",
         BindingState.NotApplied =>
             $"The renewal '{_renewal!.Name}' covers {Host}, but IIS serves a different certificate. Select the renewal on the " +
             "Certificates tab and use 'Renew now', or select its certificate for this binding in IIS Manager.",
+        BindingState.NotManaged when Site.CaseConflict(Binding.Host) is { } spellings =>
+            "No win-acme renewal covers this host. Before taking it over: " + IisSite.CaseConflictText(Binding.Host, spellings),
         BindingState.NotManaged when Binding.UsesCentralCertStore =>
             "This binding uses the IIS Central Certificate Store. Before taking it over, clear 'Use Centralized Certificate Store' " +
             "in IIS Manager (keep the current certificate selected), otherwise win-acme leaves the binding unchanged.",

@@ -186,6 +186,19 @@ public sealed class CertificateItemViewModel : ObservableObject
             }
         }
 
+        // Differently capitalized bindings of the same name confuse win-acme's IIS installation step
+        var ownHosts = EffectiveHosts.Concat(Certificate?.DnsNames ?? []).Distinct(StringComparer.OrdinalIgnoreCase);
+        foreach (var host in ownHosts)
+        {
+            foreach (var site in Sites)
+            {
+                if (site.CaseConflict(host) is { } spellings)
+                {
+                    issues.Add(new Issue(CheckLevel.Warning, IisSite.CaseConflictText(host, spellings)));
+                }
+            }
+        }
+
         // Bindings using the Central Certificate Store are skipped by win-acme's IIS
         // installation step unless it stores into the CCS itself
         if (!r.StorePlugins.Contains(PluginCatalog.StoreCentralSsl, StringComparer.OrdinalIgnoreCase))

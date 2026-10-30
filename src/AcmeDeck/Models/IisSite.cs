@@ -14,6 +14,29 @@ public sealed class IisSite
 
     public string BindingSummary => string.Join(", ", Bindings.Where(b => b.IsWeb).Select(b => b.Display));
 
+    /// <summary>
+    /// Spellings of the host name in this site's bindings when they differ only in
+    /// upper/lower case (e.g. http "Burgdorf.example.ch", https "burgdorf.example.ch"),
+    /// otherwise null. win-acme 2.2.9 narrows the matching bindings down with a
+    /// case-sensitive comparison (IISHttpBindingUpdater.AddOrUpdateBindings) and then
+    /// neither updates the https binding nor adds one ("Prevent adding duplicate binding").
+    /// </summary>
+    public IReadOnlyList<string>? CaseConflict(string host)
+    {
+        var spellings = Bindings
+            .Where(b => b.IsWeb && string.Equals(b.Host, host, StringComparison.OrdinalIgnoreCase))
+            .Select(b => b.Host)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        return spellings.Count > 1 ? spellings : null;
+    }
+
+    public static string CaseConflictText(string host, IReadOnlyList<string> spellings) =>
+        $"The bindings for {host} use different capitalization ({string.Join(", ", spellings.Select(s => "'" + s + "'"))}). " +
+        "win-acme 2.2.9 compares them case-sensitively at one point and may then leave the HTTPS binding unchanged while " +
+        "reporting success. Use the same spelling for all bindings of this name, preferably lower case " +
+        "(host names are not case-sensitive, so this is safe).";
+
     public override string ToString() => $"{Name} (ID {Id})";
 }
 
