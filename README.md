@@ -80,6 +80,11 @@ release archive and is installed with it.
 
 AcmeDeck was created by Mathias Hitz.
 
+## Support
+
+If AcmeDeck saves you time or a license fee, you can buy me a coffee via
+[PayPal](https://www.paypal.com/paypalme/usterix). Thank you!
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
