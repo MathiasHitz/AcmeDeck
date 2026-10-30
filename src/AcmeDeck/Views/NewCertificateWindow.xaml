@@ -1,0 +1,262 @@
+<Window x:Class="AcmeDeck.Views.NewCertificateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding Title}" Style="{StaticResource AppWindow}"
+        Width="880" Height="660" MinWidth="700" MinHeight="520"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+
+    <Window.Resources>
+        <!-- Step label in the header: bold and dark when it is the current step -->
+        <Style x:Key="StepLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+        </Style>
+        <Style x:Key="StepSeparator" TargetType="TextBlock" BasedOn="{StaticResource StepLabel}">
+            <Setter Property="Text" Value="›" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header with steps -->
+        <Border Background="{StaticResource CardBrush}" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1" Padding="24,16">
+            <StackPanel>
+                <TextBlock Text="{Binding Title}" Style="{StaticResource Heading}" />
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="1  Site">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource StepLabel}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Step}" Value="0">
+                                        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource StepSeparator}" />
+                    <TextBlock Text="2  Host names">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource StepLabel}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Step}" Value="1">
+                                        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource StepSeparator}" />
+                    <TextBlock Text="3  Checks">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource StepLabel}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Step}" Value="2">
+                                        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource StepSeparator}" />
+                    <TextBlock Text="4  Options">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource StepLabel}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Step}" Value="3">
+                                        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="24,18,24,12">
+
+            <!-- Step 1: site -->
+            <DockPanel Visibility="{Binding Step, Converter={StaticResource StepVisible}, ConverterParameter=0}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource Muted}" Margin="0,0,0,10"
+                           Text="Choose the IIS site. The certificate is installed on its HTTPS bindings; missing HTTPS bindings for the selected names are created." />
+                <ListBox ItemsSource="{Binding Sites}" SelectedItem="{Binding SelectedSite}"
+                         BorderBrush="{StaticResource BorderBrush}" HorizontalContentAlignment="Stretch">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="6,6">
+                                <TextBlock FontWeight="SemiBold">
+                                    <Run Text="{Binding Name, Mode=OneWay}" />
+                                    <Run Text="{Binding Id, StringFormat=' (ID {0})', Mode=OneWay}"
+                                         Foreground="{StaticResource MutedTextBrush}" FontWeight="Normal" />
+                                </TextBlock>
+                                <TextBlock Text="{Binding BindingSummary}" Style="{StaticResource Muted}" />
+                                <TextBlock Text="{Binding PhysicalPath}" Style="{StaticResource Muted}" FontSize="11" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- Step 2: host names -->
+            <DockPanel Visibility="{Binding Step, Converter={StaticResource StepVisible}, ConverterParameter=1}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource Muted}" Margin="0,0,0,10"
+                           Text="Choose the host names for the certificate. Only bindings of the site are offered. The list is stored explicitly, so bindings added later do not change the certificate." />
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,12,0,0"
+                            Visibility="{Binding SelectedHosts.Count, Converter={StaticResource HasValue}}">
+                    <TextBlock Text="Common name" Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <ComboBox ItemsSource="{Binding SelectedHosts}" SelectedItem="{Binding CommonName}" MinWidth="280" />
+                </StackPanel>
+                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Background="{StaticResource CardBrush}"
+                        CornerRadius="4">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding HostOptions}" Margin="10,6">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="160" />
+                                            <ColumnDefinition Width="2*" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsValid}"
+                                                  Content="{Binding Host}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Protocols}" Style="{StaticResource Muted}"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Note}" TextWrapping="Wrap" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsValid}" Value="False">
+                                                            <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </DockPanel>
+
+            <!-- Step 3: checks -->
+            <DockPanel Visibility="{Binding Step, Converter={StaticResource StepVisible}, ConverterParameter=2}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource Muted}" Margin="0,0,0,10"
+                           Text="Checks before anything is requested. The staging test runs the full validation against the Let's Encrypt test environment without touching IIS and without counting against the rate limits." />
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="Check again" Command="{Binding RecheckCommand}" Margin="0,0,8,0" />
+                    <Button Content="Test against staging…" Command="{Binding StagingTestCommand}" />
+                    <ProgressBar IsIndeterminate="True" Width="120" Height="4" Margin="16,0,0,0" VerticalAlignment="Center"
+                                 Visibility="{Binding IsChecking, Converter={StaticResource BoolToVisibility}}" />
+                </StackPanel>
+                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Background="{StaticResource CardBrush}"
+                        CornerRadius="4" Padding="12,8">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding CheckResults}" ItemTemplate="{StaticResource CheckLine}" />
+                    </ScrollViewer>
+                </Border>
+            </DockPanel>
+
+            <!-- Step 4: options -->
+            <ScrollViewer Visibility="{Binding Step, Converter={StaticResource StepVisible}, ConverterParameter=3}"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <HeaderedContentControl Header="Contact e-mail" Style="{StaticResource Field}">
+                        <StackPanel>
+                            <TextBox Text="{Binding ContactEmail, UpdateSourceTrigger=PropertyChanged}" MaxWidth="420"
+                                     HorizontalAlignment="Left" MinWidth="320" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12" Margin="0,4,0,0"
+                                       Text="Used when the ACME account is created. Let's Encrypt does not send expiry reminders any more; use the e-mail notification in the settings." />
+                        </StackPanel>
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Header="Validation" Style="{StaticResource Field}">
+                        <StackPanel>
+                            <RadioButton GroupName="Validation"
+                                         IsChecked="{Binding Validation, Converter={StaticResource EnumToBool}, ConverterParameter=SelfHosting}">
+                                <StackPanel>
+                                    <TextBlock Text="SelfHosting (recommended)" FontWeight="SemiBold" />
+                                    <TextBlock Style="{StaticResource Muted}" FontSize="12"
+                                               Text="win-acme answers the challenge on port 80 itself. Works independently of the site configuration." />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton GroupName="Validation" IsEnabled="{Binding HasFileSystemPath}"
+                                         IsChecked="{Binding Validation, Converter={StaticResource EnumToBool}, ConverterParameter=FileSystem}">
+                                <StackPanel>
+                                    <TextBlock Text="FileSystem" FontWeight="SemiBold" />
+                                    <TextBlock Style="{StaticResource Muted}" FontSize="12"
+                                               Text="The challenge file is placed in the web root of the site and served by IIS. Needs an HTTP binding on port 80 for every name." />
+                                </StackPanel>
+                            </RadioButton>
+                        </StackPanel>
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Header="Friendly name" Style="{StaticResource Field}">
+                        <StackPanel>
+                            <TextBox Text="{Binding FriendlyName, UpdateSourceTrigger=PropertyChanged}" MinWidth="320"
+                                     MaxWidth="420" HorizontalAlignment="Left" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12" Margin="0,4,0,0"
+                                       Text="Optional. Defaults to the common name." />
+                        </StackPanel>
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Header="Previous renewal" Style="{StaticResource Field}"
+                                            Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVisibility}}">
+                        <CheckBox IsChecked="{Binding DeletePrevious}">
+                            <TextBlock TextWrapping="Wrap">
+                                <Run Text="Delete" />
+                                <Run Text="{Binding EditName, Mode=OneWay}" FontWeight="SemiBold" />
+                                <Run Text="after the new certificate has been issued" />
+                            </TextBlock>
+                        </CheckBox>
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Header="Terms" Style="{StaticResource Field}">
+                        <CheckBox IsChecked="{Binding AcceptTerms}">
+                            <TextBlock TextWrapping="Wrap">
+                                <Run Text="I accept the" />
+                                <Hyperlink NavigateUri="https://letsencrypt.org/repository/" RequestNavigate="OnNavigate">Let's Encrypt Subscriber Agreement</Hyperlink>
+                            </TextBlock>
+                        </CheckBox>
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Header="Command" Style="{StaticResource Field}">
+                        <TextBox Text="{Binding CommandPreview, Mode=OneWay}" Style="{StaticResource MonoValue}" />
+                    </HeaderedContentControl>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0" Padding="24,12">
+            <Grid>
+                <Button Content="Cancel" IsCancel="True" HorizontalAlignment="Left" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Back" Command="{Binding BackCommand}" Margin="0,0,8,0" />
+                    <Button Content="Next" Command="{Binding NextCommand}" Style="{StaticResource PrimaryButton}"
+                            IsDefault="True"
+                            Visibility="{Binding IsLastStep, Converter={StaticResource HasValue}, ConverterParameter=invert}" />
+                    <Button Content="Request certificate" Command="{Binding CreateCommand}"
+                            Style="{StaticResource PrimaryButton}"
+                            Visibility="{Binding IsLastStep, Converter={StaticResource BoolToVisibility}}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

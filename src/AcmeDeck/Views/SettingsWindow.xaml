@@ -1,0 +1,175 @@
+<Window x:Class="AcmeDeck.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:AcmeDeck.ViewModels"
+        Title="Settings" Style="{StaticResource AppWindow}"
+        Width="820" Height="640" MinWidth="680" MinHeight="520"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TabControl Margin="20,16,20,10" Padding="16" Background="{StaticResource CardBrush}">
+
+            <TabItem Header="win-acme">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <HeaderedContentControl Header="wacs.exe" Style="{StaticResource Field}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding WacsPath, UpdateSourceTrigger=LostFocus}" />
+                                    <Button Grid.Column="1" Content="Browse…" Command="{Binding BrowseCommand}" Margin="8,0,0,0" />
+                                </Grid>
+                                <TextBlock Text="{Binding WacsInfo}" Style="{StaticResource Muted}" Margin="0,4,0,0" />
+                                <Border Background="{StaticResource WarningBackgroundBrush}" CornerRadius="5" Padding="10,6"
+                                        Margin="0,6,0,0"
+                                        Visibility="{Binding LocationWarning, Converter={StaticResource HasValue}}">
+                                    <TextBlock Text="{Binding LocationWarning}" TextWrapping="Wrap" />
+                                </Border>
+                            </StackPanel>
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="Configuration" Style="{StaticResource Field}">
+                            <StackPanel>
+                                <TextBox Text="{Binding ConfigurationPath, Mode=OneWay}" Style="{StaticResource MonoValue}" />
+                                <Button Content="Open folder" Style="{StaticResource LinkButton}" HorizontalAlignment="Left"
+                                        Command="{Binding OpenConfigFolderCommand}" />
+                            </StackPanel>
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="Logs" Style="{StaticResource Field}">
+                            <TextBox Text="{Binding LogPath, Mode=OneWay}" Style="{StaticResource MonoValue}" />
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="Program folder" Style="{StaticResource Field}">
+                            <Button Content="Open folder" Style="{StaticResource LinkButton}" HorizontalAlignment="Left"
+                                    Command="{Binding OpenWacsFolderCommand}" />
+                        </HeaderedContentControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Notifications">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel IsEnabled="{Binding NotificationAvailable}">
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,0,0,14"
+                                   Text="win-acme sends an e-mail when a renewal fails. These settings are stored in win-acme's settings.json (a backup is created on every save)." />
+                        <HeaderedContentControl Header="SMTP server" Style="{StaticResource Field}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="80" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SmtpServer}" />
+                                <TextBlock Grid.Column="1" Text="Port" Style="{StaticResource FieldLabel}" Margin="12,0,8,0"
+                                           VerticalAlignment="Center" />
+                                <TextBox Grid.Column="2" Text="{Binding SmtpPort}" />
+                            </Grid>
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="Encryption" Style="{StaticResource Field}">
+                            <ComboBox ItemsSource="{x:Static vm:SettingsViewModel.SecurityOptions}"
+                                      SelectedValuePath="Value" DisplayMemberPath="Label"
+                                      SelectedValue="{Binding Security}" HorizontalAlignment="Left" MinWidth="320" />
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="User name" Style="{StaticResource Field}">
+                            <TextBox Text="{Binding SmtpUser}" />
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="Password" Style="{StaticResource Field}">
+                            <StackPanel>
+                                <PasswordBox x:Name="PasswordInput" PasswordChanged="OnPasswordChanged" />
+                                <TextBlock Text="{Binding PasswordHint}" Style="{StaticResource Muted}" FontSize="12" Margin="0,4,0,0"
+                                           Visibility="{Binding PasswordHint, Converter={StaticResource HasValue}}" />
+                            </StackPanel>
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="Sender name" Style="{StaticResource Field}">
+                            <TextBox Text="{Binding SenderName}" />
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="Sender address" Style="{StaticResource Field}">
+                            <TextBox Text="{Binding SenderAddress}" />
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="Receivers" Style="{StaticResource Field}">
+                            <StackPanel>
+                                <TextBox Text="{Binding Receivers}" />
+                                <TextBlock Text="Separate several addresses with a semicolon." Style="{StaticResource Muted}"
+                                           FontSize="12" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="Computer name" Style="{StaticResource Field}">
+                            <StackPanel>
+                                <TextBox Text="{Binding ComputerName}" />
+                                <TextBlock Text="Shown in the subject instead of the Windows machine name." Style="{StaticResource Muted}"
+                                           FontSize="12" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="" Style="{StaticResource Field}">
+                            <CheckBox Content="Also send an e-mail when a certificate was renewed successfully"
+                                      IsChecked="{Binding EmailOnSuccess}" />
+                        </HeaderedContentControl>
+                        <HeaderedContentControl Header="" Style="{StaticResource Field}">
+                            <Button Content="Send test e-mail" Command="{Binding SendTestCommand}" HorizontalAlignment="Left" />
+                        </HeaderedContentControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Scheduled task">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Muted}" Margin="0,0,0,12"
+                               Text="win-acme renews through a daily Windows scheduled task. It only does work when a certificate is due." />
+                    <HeaderedContentControl Header="Task" Style="{StaticResource Field}">
+                        <TextBlock Text="{Binding TaskSummary}" TextWrapping="Wrap" />
+                    </HeaderedContentControl>
+                    <ItemsControl ItemsSource="{Binding TaskDetails}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <HeaderedContentControl Header="{Binding Key}" Style="{StaticResource Field}">
+                                    <TextBlock Text="{Binding Value}" TextWrapping="Wrap" />
+                                </HeaderedContentControl>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0"
+                               Text="To create or repair the task, use the corresponding button on the main window." />
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="General">
+                <StackPanel>
+                    <HeaderedContentControl Header="Contact e-mail" Style="{StaticResource Field}">
+                        <StackPanel>
+                            <TextBox Text="{Binding ContactEmail}" />
+                            <TextBlock Text="Pre-filled when requesting new certificates." Style="{StaticResource Muted}"
+                                       FontSize="12" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </HeaderedContentControl>
+                    <HeaderedContentControl Header="Online checks" Style="{StaticResource Field}">
+                        <StackPanel>
+                            <CheckBox Content="Check public DNS and this server's public IP address" IsChecked="{Binding OnlineChecks}" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12" Margin="0,4,0,0"
+                                       Text="Sends host names to dns.google (DNS over HTTPS) and asks api.ipify.org for the public IP. Nothing else leaves this server." />
+                        </StackPanel>
+                    </HeaderedContentControl>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
+        <Border Grid.Row="1" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0" Padding="20,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding TestStatus}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Save" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" />
+                    <Button Content="Close" IsCancel="True" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

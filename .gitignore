@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+*.user
+setup/output/
+setup/publish/
+setup/win-acme/
