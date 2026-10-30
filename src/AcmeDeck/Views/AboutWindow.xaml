@@ -28,6 +28,15 @@
             <HeaderedContentControl Header="Author" Style="{StaticResource Field}">
                 <TextBlock x:Name="AuthorText" FontWeight="SemiBold" />
             </HeaderedContentControl>
+            <HeaderedContentControl Header="Project" Style="{StaticResource Field}">
+                <TextBlock TextWrapping="Wrap">
+                    <Hyperlink NavigateUri="https://github.com/MathiasHitz/AcmeDeck" RequestNavigate="OnNavigate">github.com/MathiasHitz/AcmeDeck</Hyperlink>
+                    <LineBreak />
+                    <Hyperlink NavigateUri="https://github.com/MathiasHitz/AcmeDeck/releases/latest" RequestNavigate="OnNavigate">Latest release</Hyperlink>
+                    <LineBreak />
+                    <Hyperlink NavigateUri="https://github.com/MathiasHitz/AcmeDeck/issues/new/choose" RequestNavigate="OnNavigate">Report a problem or suggest a feature</Hyperlink>
+                </TextBlock>
+            </HeaderedContentControl>
             <HeaderedContentControl Header="License" Style="{StaticResource Field}">
                 <TextBlock TextWrapping="Wrap">
                     <Run x:Name="CopyrightRun" />
