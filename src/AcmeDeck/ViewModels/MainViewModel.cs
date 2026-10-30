@@ -38,6 +38,7 @@ public sealed class MainViewModel : ObservableObject
         OpenSettingsCommand = new AsyncRelayCommand(OpenSettingsAsync);
         OpenLogsCommand = new RelayCommand(OpenLogs, () => Directory.Exists(_environment.LogPath));
         OpenRenewalFileCommand = new RelayCommand(() => OpenInExplorer(Selected?.Renewal.FilePath), () => Selected != null);
+        OpenAboutCommand = new RelayCommand(() => new AboutWindow { Owner = _owner }.ShowDialog());
     }
 
     public ObservableCollection<CertificateItemViewModel> Certificates { get; } = [];
@@ -106,6 +107,7 @@ public sealed class MainViewModel : ObservableObject
     public AsyncRelayCommand OpenSettingsCommand { get; }
     public RelayCommand OpenLogsCommand { get; }
     public RelayCommand OpenRenewalFileCommand { get; }
+    public RelayCommand OpenAboutCommand { get; }
 
     public async Task RefreshAsync()
     {

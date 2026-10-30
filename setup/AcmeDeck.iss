@@ -17,7 +17,8 @@
 AppId={{#AppId}
 AppName=AcmeDeck
 AppVersion={#AppVersion}
-AppPublisher=AcmeDeck contributors
+AppPublisher=Mathias Hitz
+AppCopyright=Copyright (c) 2026 Mathias Hitz
 AppComments=Graphical front end for win-acme to manage Let's Encrypt certificates in IIS
 DefaultDirName={autopf}\AcmeDeck
 DefaultGroupName=AcmeDeck

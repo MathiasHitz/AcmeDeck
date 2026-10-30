@@ -14,8 +14,8 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Version>1.0.0</Version>
     <Product>AcmeDeck</Product>
-    <Authors>AcmeDeck contributors</Authors>
-    <Copyright>Copyright (c) 2026 AcmeDeck contributors</Copyright>
+    <Authors>Mathias Hitz</Authors>
+    <Copyright>Copyright (c) 2026 Mathias Hitz</Copyright>
     <Description>Graphical front end for win-acme to manage Let's Encrypt certificates in IIS.</Description>
   </PropertyGroup>
 

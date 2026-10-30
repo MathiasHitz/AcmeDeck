@@ -7,6 +7,7 @@ namespace AcmeDeck;
 public partial class App : Application
 {
     public const string Title = "AcmeDeck";
+    public const string Author = "Mathias Hitz";
 
     protected override void OnStartup(StartupEventArgs e)
     {

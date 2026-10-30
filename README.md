@@ -76,6 +76,10 @@ deliberately left in place on uninstall, because the scheduled task points to it
 win-acme is licensed under the Apache License 2.0; its license file is part of the
 release archive and is installed with it.
 
+## Author
+
+AcmeDeck was created by Mathias Hitz.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
