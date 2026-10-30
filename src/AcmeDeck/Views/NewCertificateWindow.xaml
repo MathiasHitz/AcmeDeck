@@ -187,12 +187,14 @@
 
                     <HeaderedContentControl Header="Validation" Style="{StaticResource Field}">
                         <StackPanel>
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12" Margin="0,2,0,6"
+                                       Text="Before issuing, Let's Encrypt checks that this server really answers for each host name: it requests a short code from http://&lt;host name&gt;/.well-known/acme-challenge/ on port 80. The options differ only in who answers that request." />
                             <RadioButton GroupName="Validation"
                                          IsChecked="{Binding Validation, Converter={StaticResource EnumToBool}, ConverterParameter=SelfHosting}">
                                 <StackPanel>
                                     <TextBlock Text="SelfHosting (recommended)" FontWeight="SemiBold" />
                                     <TextBlock Style="{StaticResource Muted}" FontSize="12"
-                                               Text="win-acme answers the challenge on port 80 itself. Works independently of the site configuration." />
+                                               Text="win-acme answers the request itself for the few seconds of the check. It shares port 80 with IIS, so the website keeps running and its configuration does not matter: no HTTP binding needed, redirects and logins do not get in the way. This is the default of win-acme." />
                                 </StackPanel>
                             </RadioButton>
                             <RadioButton GroupName="Validation" IsEnabled="{Binding HasFileSystemPath}"
@@ -200,9 +202,11 @@
                                 <StackPanel>
                                     <TextBlock Text="FileSystem" FontWeight="SemiBold" />
                                     <TextBlock Style="{StaticResource Muted}" FontSize="12"
-                                               Text="The challenge file is placed in the web root of the site and served by IIS. Needs an HTTP binding on port 80 for every name." />
+                                               Text="win-acme puts the code as a file into the website folder and IIS delivers it. Every host name needs an HTTP binding on port 80, and the site must hand out the file unchanged, so no application that handles all URLs and no login. Only needed if another program such as Apache or nginx occupies port 80." />
                                 </StackPanel>
                             </RadioButton>
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12" Margin="0,4,0,0"
+                                       Text="In both cases port 80 must be reachable from the whole internet. Let's Encrypt checks from several locations worldwide, so a firewall that only allows certain countries or addresses makes the check fail." />
                         </StackPanel>
                     </HeaderedContentControl>
 
