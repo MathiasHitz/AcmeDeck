@@ -1,13 +1,24 @@
-# AcmeDeck
+# AcmeDeck – free Windows GUI for win-acme
 
-A graphical front end for [win-acme](https://www.win-acme.com/) to manage Let's Encrypt
-certificates for IIS on Windows Server.
+**Request, renew and monitor Let's Encrypt SSL/TLS certificates for IIS on Windows Server,
+with a graphical interface instead of the command line.**
 
-win-acme does the actual work: ordering, validation, storing, binding and the daily
-renewal task. AcmeDeck gives it a point-and-click interface and adds the checks that
-are missing when something silently goes wrong.
+[**Download the installer**](https://github.com/MathiasHitz/AcmeDeck/releases/latest) ·
+Windows x64 · no .NET runtime required · MIT License
 
-> AcmeDeck is an independent project and not affiliated with win-acme or Let's Encrypt.
+![AcmeDeck: overview of all certificates with expiry, next renewal and binding check](docs/screenshots/certificates.png)
+
+[win-acme](https://www.win-acme.com/) does the actual work: ordering, validation,
+storing, binding and the daily renewal task. AcmeDeck gives it a point-and-click
+interface and adds the checks that are missing when something silently goes wrong,
+for example a certificate that was issued but never reached the IIS binding.
+
+AcmeDeck is a free alternative for managing IIS certificates with win-acme. It can take
+over bindings whose certificates were created with other tools, for example
+Certify The Web.
+
+> AcmeDeck is an independent project and not affiliated with win-acme, Let's Encrypt or
+> Certify The Web. All product names are trademarks of their respective owners.
 
 ## Features
 
@@ -27,12 +38,27 @@ are missing when something silently goes wrong.
   - several renewals managing the same certificate or the same host name
   - renewals without site or host filter
   - host names Let's Encrypt will reject (`localhost`, IP addresses, `.local` …)
+  - bindings that win-acme leaves unchanged: different capitalization of the same host
+    name, or the IIS Central Certificate Store option
 - **Binding check**: connects to each HTTPS binding with SNI and compares the served
-  certificate with the one win-acme issued last.
-- **Public DNS check** via DNS over HTTPS, independent of local resolvers, Pi-hole or
-  hosts entries. Detects names that only resolve through a hoster's wildcard record.
+  certificate with the one win-acme issued last. Certificates that were issued but are
+  not in use show as **Not applied** instead of looking valid.
+- **Public DNS check** via DNS over HTTPS, independent of local DNS servers or hosts
+  entries. Detects names that only resolve through a wildcard record at the DNS provider.
 - **Notification settings** for win-acme's settings.json with a test e-mail
 - **Log viewer** with a warnings-and-errors filter
+
+## Screenshots
+
+**IIS bindings** – every HTTPS binding with the certificate IIS actually serves.
+Certificates from other tools can be taken over with one click.
+
+![AcmeDeck: IIS bindings view with a certificate from another tool ready to be taken over](docs/screenshots/iis-bindings.png)
+
+**New certificate** – pick the site and host names; names Let's Encrypt would reject are
+excluded up front.
+
+![AcmeDeck: wizard for a new Let's Encrypt certificate, host name selection](docs/screenshots/new-certificate.png)
 
 ## Requirements
 
