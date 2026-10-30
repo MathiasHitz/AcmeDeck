@@ -1,0 +1,78 @@
+name: Bug report
+description: Something in AcmeDeck does not work as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. The details below make it much easier to find the cause.
+
+        **Please replace host names, IP addresses and e-mail addresses you don't want to publish**, for example with `example.com`. Issues are public.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you see, and what is wrong about it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the IIS bindings tab
+        2. Select the binding for shop.example.com
+        3. Click "Take over"
+        4. ...
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+
+  - type: input
+    id: acmedeck-version
+    attributes:
+      label: AcmeDeck version
+      description: Shown in the About window.
+      placeholder: "1.0.2"
+    validations:
+      required: true
+
+  - type: input
+    id: wacs-version
+    attributes:
+      label: win-acme version
+      description: Shown below the title in the AcmeDeck main window.
+      placeholder: "2.2.9.1701"
+
+  - type: input
+    id: windows-version
+    attributes:
+      label: Windows version
+      placeholder: "Windows Server 2022, English"
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log excerpt
+      description: |
+        In AcmeDeck, open **Logs**, tick *Only warnings and errors* or search for the host name, and copy the lines around the problem.
+        If a win-acme run is involved, the output of the run window ("Copy output") helps as well.
+      render: text
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Optional. Drag and drop images here.
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before submitting
+      options:
+        - label: I removed or replaced host names, IP addresses and e-mail addresses I don't want to publish.
+          required: true

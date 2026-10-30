@@ -1,0 +1,38 @@
+name: Feature request
+description: An idea for something AcmeDeck should do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas are welcome. Please check the [open issues](https://github.com/MathiasHitz/AcmeDeck/issues) first, maybe someone suggested it already. If so, add a comment there instead.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would it solve?
+      description: Describe the situation in which you miss this. The problem is often more useful than a specific solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: How could it work?
+      description: Optional. Your idea of how AcmeDeck could handle it.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: How do you handle it today?
+      description: Optional. For example a win-acme command line, a script or a manual step.
+
+  - type: dropdown
+    id: help
+    attributes:
+      label: Could you help with testing?
+      description: Some features need a real environment to verify, for example an account with another certificate authority.
+      options:
+        - "Yes"
+        - "Maybe"
+        - "No"
