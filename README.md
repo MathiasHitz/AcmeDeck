@@ -57,6 +57,40 @@ The only file AcmeDeck edits is the `Notification` section of win-acme's
 Online checks send host names to `dns.google` and ask `api.ipify.org` for the public
 IP of the server. They can be switched off in the settings.
 
+## Taking over existing certificates
+
+A checklist for moving a server from another certificate tool to win-acme. Each point
+is a pitfall that caused real failures.
+
+**Before you start**
+
+1. **Port 80 must be reachable from the whole internet.** Let's Encrypt validates from
+   several locations worldwide. A firewall that only allows certain countries or
+   addresses makes validation fail. Use the staging test in the wizard first.
+2. **Every host name needs its own public DNS record pointing to the server.** A
+   wildcard record at the DNS provider can make a name resolve to a different machine,
+   and local resolvers may show something else than the internet sees. The public DNS
+   check in AcmeDeck looks at what Let's Encrypt sees.
+3. **Stop or uninstall the previous tool first.** Otherwise it may keep renewing and put
+   its own certificate back into the binding. Its certificates stay valid until they
+   expire, but are no longer renewed, so take every binding over before that date.
+
+**Installing**
+
+4. Install AcmeDeck with the bundled win-acme, or point it to an existing win-acme in
+   the settings. AcmeDeck warns if win-acme runs from a user profile folder.
+5. Configure the e-mail notification and send a test message.
+
+**Taking over**
+
+6. Open the **IIS bindings** tab and fix every warning *before* taking anything over:
+   - bindings of the same host name with different capitalization (win-acme 2.2.9 then
+     reports success without updating the HTTPS binding) — use lower case everywhere
+   - bindings with "Use Centralized Certificate Store" — clear the option in IIS Manager
+   - host names that cannot be certified, such as `localhost`
+7. Take the bindings over one by one and check that each one turns to **Managed**.
+8. When done, no binding should show **Not managed** or **Not applied**.
+
 ## Building
 
 Requires the .NET 10 SDK and, for the installer, Inno Setup 6.
