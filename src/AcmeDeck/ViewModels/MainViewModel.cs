@@ -17,6 +17,7 @@ public sealed class MainViewModel : ObservableObject
     private ScheduledTaskInfo? _task;
     private CertificateItemViewModel? _selected;
     private bool _isBusy;
+    private bool _hasLoaded;
     private string _statusText = "";
     private int _selectedTab;
 
@@ -92,6 +93,27 @@ public sealed class MainViewModel : ObservableObject
     public string ConfigText => _environment.ConfigurationPath;
 
     public bool HasCertificates => Certificates.Count > 0;
+
+    /// <summary>
+    /// False until the first refresh has finished, so the list shows
+    /// "Loading" instead of the empty state while win-acme is being read
+    /// </summary>
+    public bool HasLoaded
+    {
+        get => _hasLoaded;
+        private set
+        {
+            if (SetProperty(ref _hasLoaded, value))
+            {
+                OnPropertyChanged(nameof(IsFirstLoad));
+                OnPropertyChanged(nameof(ShowEmptyState));
+            }
+        }
+    }
+
+    public bool IsFirstLoad => !_hasLoaded;
+
+    public bool ShowEmptyState => _hasLoaded && Certificates.Count == 0;
 
     public AsyncRelayCommand RefreshCommand { get; }
     public AsyncRelayCommand NewCertificateCommand { get; }
@@ -184,6 +206,7 @@ public sealed class MainViewModel : ObservableObject
             OnPropertyChanged(nameof(TaskText));
             OnPropertyChanged(nameof(ConfigText));
             OnPropertyChanged(nameof(HasCertificates));
+            OnPropertyChanged(nameof(ShowEmptyState));
             StatusText = $"{Certificates.Count} certificate{(Certificates.Count == 1 ? "" : "s")} · refreshed {DateTime.Now:HH:mm:ss}";
 
             // Check every certificate's bindings right away, so a certificate that
@@ -200,6 +223,7 @@ public sealed class MainViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+            HasLoaded = true;
         }
     }
 

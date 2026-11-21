@@ -34,8 +34,13 @@
                     <TextBlock Text="{Binding EnvironmentText}" Style="{StaticResource Muted}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="New certificate" Command="{Binding NewCertificateCommand}"
-                            Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" />
+                    <Button Command="{Binding NewCertificateCommand}" Style="{StaticResource AccentButton}"
+                            Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource PlusIcon}" />
+                            <TextBlock Text="New certificate" />
+                        </StackPanel>
+                    </Button>
                     <Button Content="Refresh" Command="{Binding RefreshCommand}" Margin="0,0,8,0" />
                     <Button Content="Logs" Command="{Binding OpenLogsCommand}" Margin="0,0,8,0" />
                     <Button Content="Settings" Command="{Binding OpenSettingsCommand}" Margin="0,0,8,0" />
@@ -105,15 +110,30 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
+                    <!-- First load -->
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding IsFirstLoad, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="Loading certificates…" Style="{StaticResource SectionHeading}"
+                                   HorizontalAlignment="Center" />
+                        <ProgressBar IsIndeterminate="True" Width="200" Height="4" Margin="0,4,0,0"
+                                     Foreground="{StaticResource AccentBrush}" Background="{StaticResource BorderBrush}"
+                                     BorderThickness="0" />
+                    </StackPanel>
+
                     <!-- Empty state -->
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Visibility="{Binding Certificates.Count, Converter={StaticResource HasValue}, ConverterParameter=invert}">
+                                Visibility="{Binding ShowEmptyState, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="No certificates yet" Style="{StaticResource SectionHeading}"
                                    HorizontalAlignment="Center" />
                         <TextBlock Text="Request a certificate for an IIS site, or take over an existing binding on the 'IIS bindings' tab."
                                    Style="{StaticResource Muted}" TextAlignment="Center" MaxWidth="320" Margin="0,0,0,12" />
-                        <Button Content="New certificate" Command="{Binding NewCertificateCommand}"
-                                Style="{StaticResource PrimaryButton}" HorizontalAlignment="Center" />
+                        <Button Command="{Binding NewCertificateCommand}" Style="{StaticResource AccentButton}"
+                                HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{StaticResource PlusIcon}" />
+                                <TextBlock Text="New certificate" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
 
                     <GridSplitter Grid.Column="1" Width="12" HorizontalAlignment="Stretch" Background="Transparent" />
